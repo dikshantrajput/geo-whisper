@@ -23,6 +23,7 @@
         isDenied: writable(undefined),
         showEducationalModal: writable(false),
         showLocationAccessModal: writable(false),
+        successActionCallback: writable(undefined),
     });
 
     export let data;

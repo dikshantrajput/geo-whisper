@@ -1,95 +1,3 @@
-<!-- <script>
-  import { enhance } from "$app/forms";
-  import { getUserLocation } from "@/utils";
-  import { LAT_LONG_CONTEXT } from "@/utils/constants";
-  import { getContext } from "svelte";
-  import { toast } from "svelte-sonner";
-
-  export let message = "";
-
-  const ctx = getContext(LAT_LONG_CONTEXT);
-  const lat = ctx.lat;
-  const long = ctx.long;
-  const isDenied = ctx.isDenied;
-  const showEducationalModal = ctx.showEducationalModal;
-
-  const messageFormSubmitAction = async ({ formData, cancel }) => {
-    let toastId;
-
-    if (!$lat || !$long) {
-      toastId = toast.loading(
-        "Please allow location access to post message...",
-      );
-      try {
-        const loc = await getUserLocation();
-        lat.set(loc.latitude);
-        long.set(loc.longitude);
-      } catch (error) {
-        toast.error("Location access denied...");
-        cancel();
-        showEducationalModal.set(true);
-        return;
-      }
-    } else {
-      toastId = toast.loading("Posting your message...");
-    }
-
-    toastId = toast.loading("Posting message...");
-    formData.append("long", $long);
-    formData.append("lat", $lat);
-    return async ({ result, update }) => {
-      toast.dismiss(toastId);
-      if (result.status === 200) {
-        toast.success("Message posted on location");
-        await update();
-        message = undefined;
-      } else {
-        toast.error("Error adding message on location");
-      }
-    };
-  };
-</script>
-
-<div class="bg-gray-900 rounded-xl p-8">
-  <h2 class="text-3xl font-bold text-white mb-8">Share Your Thoughts</h2>
-  <form
-    class="space-y-6"
-    method="POST"
-    action="?/addMessageOnLocation"
-    use:enhance={messageFormSubmitAction}
-  >
-    <div class="relative">
-      <textarea
-        id="message"
-        name="message"
-        rows="5"
-        class="w-full rounded-lg border-2 border-gray-700 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-300"
-        placeholder="Type your message here..."
-        required
-        bind:value={message}
-      ></textarea>
-    </div>
-    <button
-      type="submit"
-      class="bg-purple-600 text-white font-semibold py-3 px-6 rounded-lg flex items-center justify-center hover:bg-purple-700 transition-colors duration-300"
-    >
-      <svg
-        class="w-5 h-5 mr-2"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 20 20"
-        fill="currentColor"
-      >
-        <path
-          fill-rule="evenodd"
-          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
-          clip-rule="evenodd"
-        />
-      </svg>
-      Post Message
-    </button>
-  </form>
-</div> -->
-
 <script>
   import { enhance } from "$app/forms";
   import { getUserLocation } from "@/utils";
@@ -97,8 +5,10 @@
   import { getContext, onMount } from "svelte";
   import { toast } from "svelte-sonner";
   import { browser } from "$app/environment";
-  import { fade, scale } from "svelte/transition";
-  import ClickOutside from "svelte-click-outside"
+  import { scale } from "svelte/transition";
+  import ClickOutside from "svelte-click-outside";
+  import LocationPermission from "../LocationPermission.svelte";
+  import LocationAccessEducationalModal from "./LocationAccessEducationalModal.svelte";
   export let message = "";
 
   let loading = false;
@@ -106,30 +16,27 @@
   const ctx = getContext(LAT_LONG_CONTEXT);
   const lat = ctx.lat;
   const long = ctx.long;
-  const isDenied = ctx.isDenied;
   const showEducationalModal = ctx.showEducationalModal;
+  const showLocationAccessModal = ctx.showLocationAccessModal;
+  const wasLocationAccessDenied = ctx.isDenied;
+  const successActionCallback = ctx.successActionCallback;
 
-  const messageFormSubmitAction = async ({ formData, cancel }) => {
+  const messageFormSubmitAction = async ({ formData, cancel, submitter }) => {
     loading = true;
     let toastId;
 
     if (!$lat || !$long) {
-      toastId = toast.loading(
-        "Please allow location access to post message...",
-      );
-      try {
-        const loc = await getUserLocation();
-        lat.set(loc.latitude);
-        long.set(loc.longitude);
-      } catch (error) {
-        toast.error("Location access denied...");
-        loading = false;
+      if ($wasLocationAccessDenied) {
         showEducationalModal.set(true);
-        cancel();
-        return;
+      } else {
+        showLocationAccessModal.set(true);
       }
-    } else {
-      toastId = toast.loading("Posting your message...");
+      loading = false;
+      cancel();
+      successActionCallback.set(() => {
+        submitter?.click();
+      });
+      return;
     }
 
     toastId = toast.loading("Posting message...");
@@ -161,17 +68,18 @@
   };
 
   const toggleEmojiPicker = () => {
-    isEmojiPickerOpen = !isEmojiPickerOpen
-  }
+    isEmojiPickerOpen = !isEmojiPickerOpen;
+  };
 
-  let isEmojiPickerOpen = false, emojiPickerTrigger = undefined;
+  let isEmojiPickerOpen = false,
+    emojiPickerTrigger = undefined;
+
+  let form;
 
   onMount(initializeEmojiSelector);
 </script>
 
-<div
-  class="bg-gray-800 p-3 md:p-8 rounded-lg shadow-lg relative"
->
+<div class="bg-gray-800 p-3 md:p-8 rounded-lg shadow-lg relative">
   <div
     class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-20 pointer-events-none rounded-lg"
   ></div>
@@ -186,6 +94,7 @@
       method="POST"
       action="?/addMessageOnLocation"
       use:enhance={messageFormSubmitAction}
+      bind:this={form}
     >
       <div class="mb-2 sm:mb-4 md:mb-6 relative">
         <textarea
@@ -222,11 +131,13 @@
             </svg>
           </button>
           <ClickOutside
-          on:clickoutside={() => isEmojiPickerOpen = false}
-          exclude={[emojiPickerTrigger]}
+            on:clickoutside={() => (isEmojiPickerOpen = false)}
+            exclude={[emojiPickerTrigger]}
           >
             <div
-              class="absolute top-14 right-0 z-20 {isEmojiPickerOpen ? "visible" : "invisible"}"
+              class="absolute top-14 right-0 z-20 {isEmojiPickerOpen
+                ? 'visible'
+                : 'invisible'}"
               in:scale={{ duration: 300 }}
               out:scale={{ duration: 300 }}
             >

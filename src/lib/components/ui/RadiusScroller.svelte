@@ -1,49 +1,14 @@
-<!-- <script>
-    import Icon from "@iconify/svelte";
-  import { createEventDispatcher } from "svelte";
-
-  let radius = 500;
-
-  const dispatch = createEventDispatcher();
-</script>
-
-<div class="bg-gray-800 rounded-lg shadow-md p-8 flex flex-col items-center">
-  <h2 class="text-2xl font-bold text-white">Search Radius</h2>
-  <div class="w-80 h-48 relative">
-    <input
-      type="range"
-      min="1"
-      max="5000"
-      bind:value={radius}
-      class="absolute inset-0 m-auto w-full h-1 rounded-full bg-gray-600 appearance-none focus:outline-none"
-      style="background: linear-gradient(to right, #9f7aea {(radius / 5000) *
-        100}%, #4a5568 {(radius / 5000) * 100}%);"
-    />
-    <div
-      class="absolute inset-0 m-auto w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center"
-    >
-      <span class="text-lg font-bold text-white p-4">{radius}m</span>
-    </div>
-  </div>
-  <button
-    class="bg-purple-600 text-white p-3 rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 flex items-center justify-center gap-2"
-    on:click={() => dispatch("search", radius)}
-  >
-  <Icon icon="mdi:location" />
-  Search Nearby
-  </button>
-</div> -->
 <script>
   import { createEventDispatcher } from "svelte";
 
-const dispatch = createEventDispatcher();
+  const dispatch = createEventDispatcher();
 
   let radius = 100; // Default radius in meters
   export let loading = false;
   async function handleGetMessages() {
     dispatch("getMessages", {
-      radius
-    })
+      radius,
+    });
   }
 </script>
 
@@ -74,8 +39,9 @@ const dispatch = createEventDispatcher();
     </div>
     <button
       on:click={handleGetMessages}
-        class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold md:py-3 py-2 px-4 md:px-8 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg md:text-lg text-xs"
+      class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold md:py-3 py-2 px-4 md:px-8 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 hover:shadow-lg md:text-lg text-xs"
       disabled={loading}
+      id="avoid-click-outside"
     >
       {#if loading}
         <span class="flex items-center">
@@ -107,4 +73,3 @@ const dispatch = createEventDispatcher();
     </button>
   </div>
 </div>
-

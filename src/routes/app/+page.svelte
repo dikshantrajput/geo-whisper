@@ -25,6 +25,7 @@
   const showEducationalModal = ctx.showEducationalModal;
   const showLocationAccessModal = ctx.showLocationAccessModal;
   const wasLocationAccessDenied = ctx.isDenied;
+  const successActionCallback = ctx.successActionCallback;
 
   const requestLocationAccess = async () => {
     toast.loading("Please allow location access to get messages nearby you...");
@@ -32,6 +33,8 @@
       const loc = await getUserLocation();
       lat.set(loc.latitude);
       long.set(loc.longitude);
+      $successActionCallback && $successActionCallback();
+      successActionCallback.set(undefined);
     } catch (error) {
       toast.error("Location access denied...");
       showEducationalModal.set(true);
@@ -42,21 +45,7 @@
     }
   };
 
-  async function fetchMessages(event) {
-    isMessagesFetching = true;
-    isNearbyMessagesFetched = false;
-    const radius = event.detail.radius;
-    messages = [];
-    if (!$lat || !$long) {
-      if ($wasLocationAccessDenied) {
-        showEducationalModal.set(true);
-      }else{
-        showLocationAccessModal.set(true);
-      }
-      isMessagesFetching = false;
-      return;
-    }
-
+  const fetchMessagesFromApi = async (radius) => {
     try {
       const response = await fetch(
         `/api/getMessagesNearbyLocation?radius=${radius}&lat=${$lat}&long=${$long}`,
@@ -69,6 +58,27 @@
       isMessagesFetching = false;
       isNearbyMessagesFetched = true;
     }
+  };
+
+  async function fetchMessages(event) {
+    isMessagesFetching = true;
+    isNearbyMessagesFetched = false;
+    const radius = event.detail.radius;
+    messages = [];
+    if (!$lat || !$long) {
+      if ($wasLocationAccessDenied) {
+        showEducationalModal.set(true);
+      } else {
+        showLocationAccessModal.set(true);
+      }
+      isMessagesFetching = false;
+      successActionCallback.set(() => {
+        fetchMessagesFromApi(radius);
+      });
+      return;
+    }
+
+    await fetchMessagesFromApi(radius);
   }
 
   const prepareMessages = (rawMessages) => {

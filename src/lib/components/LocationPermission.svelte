@@ -130,6 +130,13 @@
       >
         Allow Location Access
       </button>
+
+      <button
+        on:click={() => showLocationAccessModal.set(false)}
+        class="bg-white text-gray-900 hover:bg-gray-200 font-bold py-2 px-6 md:py-3 md:px-8 rounded-lg ml-2"
+      >
+        Cancel
+      </button>
     </div>
   </div>
 {/if}
