@@ -2,11 +2,6 @@
 @tailwind components;
 @tailwind utilities;
  
-.dark-bg{
-  background-color: #0a101dfb;;
-  color: #FFFFFF;
-}
-
 :root {
   --primary-custom: #FFCC80;
   --accent-custom: #FF4500;
