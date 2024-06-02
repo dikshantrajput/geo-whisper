@@ -28,7 +28,7 @@
   const successActionCallback = ctx.successActionCallback;
 
   const requestLocationAccess = async () => {
-    toast.loading("Please allow location access to get messages nearby you...");
+    toast.loading("Please allow location access...");
     try {
       const loc = await getUserLocation();
       lat.set(loc.latitude);
