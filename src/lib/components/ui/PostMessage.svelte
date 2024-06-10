@@ -1,15 +1,12 @@
 <script>
   import { enhance } from "$app/forms";
-  import { getUserLocation } from "@/utils";
   import { LAT_LONG_CONTEXT } from "@/utils/constants";
   import { getContext, onMount } from "svelte";
   import { toast } from "svelte-sonner";
   import { browser } from "$app/environment";
   import { scale } from "svelte/transition";
   import ClickOutside from "svelte-click-outside";
-  import LocationPermission from "../LocationPermission.svelte";
-  import LocationAccessEducationalModal from "./LocationAccessEducationalModal.svelte";
-  export let message = "";
+    export let message = "";
 
   let loading = false;
 

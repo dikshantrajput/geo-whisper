@@ -3,7 +3,7 @@
 
   const dispatch = createEventDispatcher();
 
-  let radius = 100; // Default radius in meters
+  let radius = 100; 
   export let loading = false;
   async function handleGetMessages() {
     dispatch("getMessages", {
