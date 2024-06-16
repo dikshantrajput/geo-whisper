@@ -45,7 +45,7 @@
       if (result.status === 200) {
         toast.success("Message posted on location");
         await update();
-        message = undefined;
+        message = "";
       } else {
         toast.error("Error adding message on location");
       }

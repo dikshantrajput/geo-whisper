@@ -10,6 +10,7 @@
     import { scale } from "svelte/transition";
     import { cubicIn, cubicOut } from "svelte/easing";
     import { afterNavigate, beforeNavigate } from "$app/navigation";
+    import AudioPlayer from "@/components/AudioPlayer.svelte";
 
     mixpanel.init("3a39802719d0882be0b5a089edb97eb1", {
         debug: false,
@@ -37,6 +38,8 @@
     });
     afterNavigate(() => setTimeout(() => (isLoading = false), 400));
 </script>
+
+<AudioPlayer play={isLoading} soundType="jump" />
 
 <div class="flex flex-col min-h-screen bg-gray-900">
     <Toaster richColors visibleToasts={5} />

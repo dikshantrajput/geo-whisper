@@ -2,6 +2,7 @@
   import { LAT_LONG_CONTEXT } from "@/utils/constants";
   import { createEventDispatcher, getContext } from "svelte";
   import { scale } from "svelte/transition";
+    import AudioPlayer from "./AudioPlayer.svelte";
 
   const ctx = getContext(LAT_LONG_CONTEXT);
   const showLocationAccessModal = ctx.showLocationAccessModal;
@@ -10,6 +11,7 @@
   const dispatchRequestLocationPermissionClick = () => {
     dispatch("requestLocationAccess");
   };
+
 </script>
 
 {#if $showLocationAccessModal}
@@ -140,3 +142,5 @@
     </div>
   </div>
 {/if}
+
+<AudioPlayer play={$showLocationAccessModal} />
